@@ -20,3 +20,5 @@ if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 require_once get_parent_theme_file_path( '/inc/class-theme-setup.php' );
 
 require_once get_parent_theme_file_path( '/inc/template-functions.php' );
+
+require_once get_parent_theme_file_path( '/inc/breadcrumbs.php' );
