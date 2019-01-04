@@ -24,7 +24,7 @@
 		?>
 	</header><!-- .entry-header -->
 
-	<?php  epstarter_post_thumbnail( "post-thumbnail", [ 'class' => 'img-fluid', alt => get_the_title(), 'title' => get_the_title() ] ); ?>
+	<?php  epstarter_post_thumbnail( "post-thumbnail", [ 'class' => 'img-fluid', 'alt' => get_the_title(), 'title' => get_the_title() ] ); ?>
 
 	<div class="entry-content">
 		<?php
