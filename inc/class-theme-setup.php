@@ -13,11 +13,12 @@ namespace epstarter;
 
 class Setup_Theme{
 
-  public static function run( $name, $version ){
+  public static function run(){
 
     add_action( 'after_setup_theme', array( get_called_class(), 'add_support' ) );
     add_action( 'after_setup_theme', array( get_called_class(), 'register_menu' ) );
     add_action( 'wp_enqueue_scripts', array( get_called_class(), 'enqueue_scripts' ) );
+    add_filter( 'wp_resource_hints', array( get_called_class(), 'epstarter_resource_hints' ), 10, 2 );
 
   }
 
@@ -182,21 +183,88 @@ class Setup_Theme{
     $css_dir = get_template_directory_uri() . '/assets/css/';
     $js_dir = get_template_directory_uri() . '/assets/js/';
 
-    wp_enqueue_style( $theme_name . '-style', get_stylesheet_uri(), array(), $version );
+  	// Add custom fonts, used in the main stylesheet.
+  	wp_enqueue_style( $theme_name . '-fonts', self::epstarter_fonts_url(), array(), null );
+    wp_enqueue_style( $theme_name . '-style', get_stylesheet_uri(), array(), $theme_version );
     wp_enqueue_style( 'bootstrap4', $css_dir . 'bootstrap.min.css', array(), '4.2.1', 'all' );
     wp_enqueue_style( 'fontawesome5', $css_dir . 'fontawesome.min.css', array(), '5.6.3', 'all' );
-    wp_enqueue_style( $theme_name . '-theme', $css_dir . 'theme.min.css', array(), $version, 'all' );
+    wp_enqueue_style( $theme_name . '-theme', $css_dir . 'theme.min.css', array(), $theme_version, 'all' );
+
+  	// Load the html5 shiv.
+  	wp_enqueue_script( 'html5',  $js_dir . 'html5.min.js', array(), '3.7.3' );
+  	wp_script_add_data( 'html5', 'conditional', 'lt IE 9' );
+
+    wp_enqueue_script( $theme_name . '-skip-link-focus-fix', $js_dir . 'skip-link-focus-fix.min.js', array(), '20151215', true );
 
     wp_enqueue_script( 'jquery' );
     wp_enqueue_script( 'bootstrap-bundle', $js_dir . 'bootstrap.bundle.min.js', array( 'jquery' ), '4.2.1', true );
-    wp_enqueue_script( $theme_name . 'scripts', $js_dir . 'theme.min.js', array( 'jquery' ), $version, true );
+    wp_enqueue_script( $theme_name . 'scripts', $js_dir . 'theme.min.js', array( 'jquery' ), $theme_version, true );
 
+  	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+  		wp_enqueue_script( 'comment-reply' );
+  	}
+
+  }
+
+  /**
+   * Register custom fonts.
+   */
+  public static function epstarter_fonts_url() {
+
+  	$fonts_url = '';
+
+  	/*
+  	 * Translators: If there are characters in your language that are not
+  	 * supported by Libre Franklin, translate this to 'off'. Do not translate
+  	 * into your own language.
+  	 */
+  	$libre_franklin = _x( 'on', 'Libre Franklin font: on or off', 'epstarter' );
+
+  	if ( 'off' !== $libre_franklin ) {
+  		$font_families = array();
+
+  		$font_families[] = 'Libre Franklin:300,300i,400,400i,600,600i,800,800i';
+
+  		$query_args = array(
+  			'family' => urlencode( implode( '|', $font_families ) ),
+  			'subset' => urlencode( 'latin,latin-ext' ),
+  		);
+
+  		$fonts_url = add_query_arg( $query_args, 'https://fonts.googleapis.com/css' );
+  	}
+
+  	return esc_url_raw( $fonts_url );
+
+  }
+
+
+
+  /**
+   * Add preconnect for Google Fonts.
+   *
+   * @since Twenty Seventeen 1.0
+   *
+   * @param array  $urls           URLs to print for resource hints.
+   * @param string $relation_type  The relation type the URLs are printed.
+   * @return array $urls           URLs to print for resource hints.
+   */
+  public static function epstarter_resource_hints( $urls, $relation_type ) {
+
+    $theme_name = str_replace( " ", "-", strtolower( wp_get_theme()->Name ) ) ;
+
+  	if ( wp_style_is( $theme_name . '-fonts', 'queue' ) && 'preconnect' === $relation_type ) {
+  		$urls[] = array(
+  			'href' => 'https://fonts.gstatic.com',
+  			'crossorigin',
+  		);
+  	}
+
+  	return $urls;
   }
 
 
 }
 
-Setup_Theme::run( "epstarter", "1.0.0" );
+Setup_Theme::run();
 
-
- ?>
+?>
