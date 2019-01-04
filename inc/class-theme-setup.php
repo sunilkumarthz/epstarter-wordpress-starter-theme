@@ -97,6 +97,9 @@ class Setup_Theme{
 		// Enqueue editor styles.
 		add_editor_style( 'style-editor.css' );
 
+    // Add theme support for post formats. Available formats : https://codex.wordpress.org/Post_Formats
+    // add_theme_support( 'post-formats', array( 'aside', 'gallery' ) );
+
 		// Add custom editor font sizes.
 		// add_theme_support(
 		// 	'editor-font-sizes',
